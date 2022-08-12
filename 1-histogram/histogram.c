@@ -7,6 +7,7 @@ o maior valor para cada cor de cada pixel (8 ou 16 bits). A seguir a informaçã
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "omp.h"
 
 #define RGB_COMPONENT_COLOR 255
 
@@ -89,15 +90,14 @@ static PPMImage *readPPM() {
 
 void Histogram(PPMImage *image, float *h) {
 
-	int i, j,  k, l, x, count;
-	int rows, cols;
+	int j,  k, l, x, count;
 
 	float n = image->y * image->x;  /* Total de pixels da imagem */
 
-	cols = image->x;
-	rows = image->y;
         /* Faz a leitura de cada pixel, normalizando entre 0 e 3 */
-	for (i = 0; i < n; i++) {
+  int img_size = (int)n;
+  #pragma omp parallel for
+	for (int i = 0; i < img_size; i++) {
 		image->data[i].red = floor((image->data[i].red * 4) / 256);
 		image->data[i].blue = floor((image->data[i].blue * 4) / 256);
 		image->data[i].green = floor((image->data[i].green * 4) / 256);
@@ -110,11 +110,10 @@ void Histogram(PPMImage *image, float *h) {
 		for (k = 0; k <= 3; k++) {
 			for (l = 0; l <= 3; l++) {
                                 /* ... percorre todos os pixels da imagem */
-				for (i = 0; i < n; i++) {
-					if (image->data[i].red == j && 
-                                            image->data[i].green == k && 
-                                            image->data[i].blue == l) {
-						count++;
+        #pragma omp parallel for reduction(+:count)
+				for (int i = 0; i < img_size; i++) {
+					if (image->data[i].red == j && image->data[i].green == k && image->data[i].blue == l) {
+						count += 1;
 					}
 				}
                                 /* Monta o histograma percentual com 64 pontos */
@@ -129,7 +128,8 @@ void Histogram(PPMImage *image, float *h) {
 int main(int argc, char *argv[]) {
 
 	int i;
-
+	/*printf("Seq\n");*/
+  printf("OMP\n");
 	PPMImage *image = readPPM();
         /* Aloca memória para o vetor do histograma */
 	float *h = (float*)malloc(sizeof(float) * 64);
