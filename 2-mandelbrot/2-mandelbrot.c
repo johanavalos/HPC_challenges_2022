@@ -2,41 +2,30 @@
 # include <stdio.h>
 # include <math.h>
 # include <time.h>
-
+#include  <mpi.h>
 # include <omp.h>
 
-int main ( );
+int main ( int argc, char *argv[] );
 int i4_min ( int i1, int i2 );
 void timestamp ( );
 
 /******************************************************************************/
 
-int main ( )
+int main ( int argc, char *argv[] )
 
 /******************************************************************************/
 /*
 Purpose
-
 MAIN is the main program for MANDELBROT.
-
 Discussion:
-
 MANDELBROT computes an image of the Mandelbrot set.
-
 Licensing:
-
 This code is distributed under the GNU LGPL license. 
-
 Modified:
-
 03 September 2012
-
 Author:
-
 John Burkardt
-
 Local Parameters:
-
 Local, int COUNT_MAX, the maximum number of iterations taken
 for a particular pixel.
 */
@@ -77,6 +66,8 @@ for a particular pixel.
 	double y;
 	double y1;
 	double y2;
+	int my_rank, num_procs;
+	int thread_status;
 
 	timestamp ( );
 	printf ( "\n" );
@@ -100,14 +91,25 @@ for a particular pixel.
 	wtime = omp_get_wtime ( );
 /*
 Carry out the iteration for each pixel, determining COUNT.
-*/
-		for ( i = 0; i < m; i++ )
+*/		
+	    MPI_Init_thread(&argc, &argv,MPI_THREAD_MULTIPLE,&thread_status);
+    	if (thread_status!=MPI_THREAD_MULTIPLE) {
+        	printf("Failed to initialize MPI_THREAD_MULTIPLE\n");
+        	exit(-1);
+    	}
+		MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+    	MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+
+    	#pragma omp parallel 
+    	{
+    	#pragma omp for private(i,j,k) reduction(+:x,y,x1,x2,y1,y2)
+		for ( i = my_rank; i < m; i+=num_procs )
 		{
 			y = ( ( double ) (     i - 1 ) * y_max   
 				+ ( double ) ( m - i     ) * y_min ) 
 			/ ( double ) ( m     - 1 );
 
-			for ( j = 0; j < n; j++ )
+			for ( j = my_rank; j < n; j+=num_procs )
 			{
 				x = ( ( double ) (     j - 1 ) * x_max   
 					+ ( double ) ( n - j     ) * x_min ) 
@@ -118,7 +120,7 @@ Carry out the iteration for each pixel, determining COUNT.
 				x1 = x;
 				y1 = y;
 
-				for ( k = 1; k <= count_max; k++ )
+				for ( k = my_rank; k <= count_max; k+=num_procs )
 				{
 					x2 = x1 * x1 - y1 * y1 + x;
 					y2 = 2 * x1 * y1 + y;
@@ -148,6 +150,9 @@ Carry out the iteration for each pixel, determining COUNT.
 				}
 			}
 		}
+    	}
+
+	MPI_Finalize();
 
 	wtime = omp_get_wtime ( ) - wtime;
 	printf ( "\n" );
@@ -195,25 +200,15 @@ int i4_min ( int i1, int i2 )
 /******************************************************************************/
 /*
 Purpose:
-
 I4_MIN returns the smaller of two I4's.
-
 Licensing:
-
 This code is distributed under the GNU LGPL license.
-
 Modified:
-
 29 August 2006
-
 Author:
-
 John Burkardt
-
 Parameters:
-
 Input, int I1, I2, two integers to be compared.
-
 Output, int I4_MIN, the smaller of I1 and I2.
 */
 {
@@ -236,23 +231,14 @@ void timestamp ( )
 /******************************************************************************/
 /*
 Purpose:
-
 TIMESTAMP prints the current YMDHMS date as a time stamp.
-
 Example:
-
 31 May 2001 09:45:54 AM
-
 Modified:
-
 24 September 2003
-
 Author:
-
 John Burkardt
-
 Parameters:
-
 None
 */
 {
