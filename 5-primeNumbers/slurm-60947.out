@@ -1,0 +1,11 @@
+Compiling
+make: Nothing to be done for `all'.
+Running on nu-1b.cnca
+Quant. de primos entre 1 e n: 1 
+
+real	0m2.509s
+user	1m43.488s
+sys	0m0.096s
+rm -vf  seq_primos.o ./seq_primos *~
+removed ‘./seq_primos’
+done

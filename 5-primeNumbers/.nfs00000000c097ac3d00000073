@@ -1,0 +1,11 @@
+Compiling
+mpicc  seq_primos.c -O3 -Wall -fopenmp  -o seq_primos -lm -lgomp
+Running on nu-1c.cnca
+Quant. de primos entre 1 e n: 94 
+
+real	0m0.086s
+user	0m0.005s
+sys	0m0.010s
+rm -vf  seq_primos.o ./seq_primos *~
+removed ‘./seq_primos’
+done

@@ -8,6 +8,7 @@ o maior valor para cada cor de cada pixel (8 ou 16 bits). A seguir a informaçã
 #include <stdlib.h>
 #include <math.h>
 #include "omp.h"
+#include "mpi.h"
 
 #define RGB_COMPONENT_COLOR 255
 

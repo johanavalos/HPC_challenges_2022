@@ -20,7 +20,7 @@ echo "Running on $SLURM_JOB_NODELIST"
 
 
 
-time OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK ./seq_primos 20000000
+time OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK ./seq_primos 30000000
 
 make clean
 

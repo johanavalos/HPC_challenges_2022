@@ -1,0 +1,18 @@
+Compiling
+mpicc  seq_primos.c -O3 -Wall -fopenmp  -o seq_primos -lm -lgomp
+Running on nu-1b.cnca,nu-1c.cnca,nu-1d.cnca,nu-2a.cnca
+--------------------------------------------------------------------------
+An ORTE daemon has unexpectedly failed after launch and before
+communicating back to mpirun. This could be caused by a number
+of factors, including an inability to create a connection back
+to mpirun due to a lack of common network interfaces and/or no
+route found between them. Please check network connectivity
+(including firewalls and network routing requirements).
+--------------------------------------------------------------------------
+
+real	0m0.700s
+user	0m0.161s
+sys	0m0.321s
+rm -vf  seq_primos.o ./seq_primos *~
+removed ‘./seq_primos’
+done
