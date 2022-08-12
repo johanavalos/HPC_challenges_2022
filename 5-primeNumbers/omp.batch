@@ -1,0 +1,27 @@
+#!/bin/sh
+#SBATCH --nodes=1                      #Numero de Nós
+#SBATCH --ntasks-per-node=1            #Numero de tarefas por Nó
+#SBATCH --ntasks=1                     #Numero total de tarefas MPI
+#SBATCH --cpus-per-task=64             #Numero de threads
+#SBATCH -p nu                          #Fila (partition) a ser utilizada
+#SBATCH --time=10:00                   #Tempo do job
+
+
+
+echo "Compiling"
+
+module load gcc/9.3.0
+module load mpich/3.3.2-gcc-9.3.0
+
+make -j 
+
+echo "Running on $SLURM_JOB_NODELIST"
+
+
+
+
+time OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK ./seq_primos 20000000
+
+make clean
+
+echo "done"

@@ -1,0 +1,29 @@
+#!/bin/sh
+#SBATCH --job-name=hello
+#SBATCH --time=10:00
+#SBATCH --partition=nu-wide
+#SBATCH --exclusive
+#SBATCH --nodes=4
+#SBATCH --ntasks-per-node=64
+#SBATCH --ntasks=256
+#SBATCH --cpus-per-task=1
+
+echo "Compiling"
+
+module load gcc/9.3.0
+module load mpich/3.3.2-gcc-9.3.0
+
+make -j 
+
+echo "Running on $SLURM_JOB_NODELIST"
+
+MACHINEFILE="nodes.$SLURM_JOB_ID"
+srun -l hostname | sort -n | awk '{print $2}' > $MACHINEFILE
+
+time mpirun -np $SLURM_NTASKS -machinefile $MACHINEFILE ./sort < gen.in
+
+rm -f $MACHINEFILE
+
+make clean
+
+echo "done"
